@@ -2,19 +2,59 @@
 //
 
 #include <iostream>
+#include <bitset>
 
-int main()
+//function that takes a bitboard with only one piece and returns that square letter-number
+// ul -> "string"
+
+int get_bit_square(uint64_t square)
 {
-    std::cout << "Hello World!\n";
+    for(int i = 0; i < 64; i++)
+    {
+        if( square & (1ull << i))
+        {
+            return i;
+        }
+    }
+    //if there was no bit set return -1. (Should not happen)
+    return -1;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+int square_to_bit(int square)
+{
+    if ( square >= 0 && square < 64)
+    {
+        return 1ull << square;
+    }
+    
+    else { return -1; }
+}
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+class Pieces
+{
+    public:
+        uint64_t pawns;
+        
+}
+
+
+//likely should do operations 
+class ChessBoard
+{
+    public:
+
+    
+        ChessBoard()
+        {
+            
+        }
+}
+
+//first I need to be able to produce valid 
+int main()
+{
+
+
+    
+}
+
