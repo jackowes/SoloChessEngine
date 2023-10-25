@@ -41,6 +41,11 @@ class Pieces
         bitboard getKing() const { return king; }
         void setKing(bitboard nking) { king = nking; }
 
+        bitboard getColor() const { return color; }
+        void setColor(bool ncolor) { color = ncolor; }
+
+        
+
         
 };
 
@@ -167,9 +172,9 @@ int main()
     printBoard(btest);
     btest = movePiece(btest, enumSquare::e4, enumSquare::f6);
     printBoard(btest);
-    btest = movePiece(btest, enumSquare::e4, enumSquare::a1);
 
-    printBoard(btest);
+
+    
 
 
 
