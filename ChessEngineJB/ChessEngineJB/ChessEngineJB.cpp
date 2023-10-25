@@ -4,113 +4,43 @@
 #include <iostream>
 #include <bitset>
 
-//function that takes a bitboard with only one piece and returns that square letter-number
-// ul -> "string"
 
-int get_bit_square(uint64_t square)
-{
-    for(int i = 0; i < 64; i++)
-    {
-        if( square & (1ull << i))
-        {
-            return i;
-        }
-    }
-    //if there was no bit set return -1. (Should not happen)
-    return -1;
-}
-
-int square_to_bit(int square)
-{
-    if ( square >= 0 && square < 64)
-    {
-        return 1ull << square;
-    }
-    
-    else { return -1; }
-}
+#include "ChessEngineJB.h"
 
 
-enum enumSquare {
-  h1, g1, f1, e1, d1, c1, b1, a1,
-  h2, g2, f2, e2, d2, c2, b2, a2,
-  h3, g3, f3, e3, d3, c3, b3, a3,
-  h4, g4, f4, e4, d4, c4, b4, a4,
-  h5, g5, f5, e5, d5, c5, b5, a5,
-  h6, g6, f6, e6, d6, c6, b6, a6,
-  h7, g7, f7, e7, d7, c7, b7, a7,
-  h8, g8, f8, e8, d8, c8, b8, a8
-};
+struct _move {
+    std::string movestr;
+    bitboard bboard;
+}move;
 
-std::string squareString[] {
-    "h1", "g1", "f1", "e1", "d1", "c1", "b1", "a1", 
-    "h2", "g2", "f2", "e2", "d2", "c2", "b2", "a2", 
-    "h3", "g3", "f3", "e3", "d3", "c3", "b3", "a3", 
-    "h4", "g4", "f4", "e4", "d4", "c4", "b4", "a4", 
-    "h5", "g5", "f5", "e5", "d5", "c5", "b5", "a5", 
-    "h6", "g6", "f6", "e6", "d6", "c6", "b6", "a6", 
-    "h7", "g7", "f7", "e7", "d7", "c7", "b7", "a7", 
-    "h8", "g8", "f8", "e8", "d8", "c8", "b8", "a8", 
-};
-
-
-
-enum {
-    WHITEPAWNS,
-    WHITEKNIGHTS,
-    WHITEBISHOPS,
-    WHITEROOKS,
-    WHITEQUEENS,
-    WHITEKING,
-    BLACKPAWNS,
-    BLACKKNIGHTS,
-    BLACKBISHOPS,
-    BLACKROOKS,
-    BLACKQUEENS,
-    BLACKKING
-};
-
-
-std::string pieceBitboardNames[] = {
-    "WHITEPAWNS",
-    "WHITEKNIGHTS",
-    "WHITEBISHOPS",
-    "WHITEROOKS",
-    "WHITEQUEENS",
-    "WHITEKING",
-    "BLACKPAWNS",
-    "BLACKKNIGHTS",
-    "BLACKBISHOPS",
-    "BLACKROOKS",
-    "BLACKQUEENS",
-    "BLACKKING"
-};
-
-uint64_t pieceBitboards[] = {
-    0x000000000000FF00, //WHITEPAWNS
-    0x0000000000000042, //WHITEKNIGHTS
-    0x0000000000000024, //WHITEBISHOPS
-    0x0000000000000081, //WHITEROOKS
-    0x0000000000000010, //WHITEQUEENS //000010000
-    0x0000000000000008, //WHITEKING
-    0x00FF000000000000, //BLACKPAWNS
-    0x4200000000000000, //BLACKKNIGHTS
-    0x2400000000000000, //BLACKBISHOPS
-    0x8100000000000000, //BLACKROOKS
-    0x1000000000000000, //BLACKQUEENS
-    0x0800000000000000, //BLACKKING
-
-};
 
 
 class Pieces
 {
+    private:
+        bool color;
+        bitboard pawns;
+        bitboard rooks;
+        bitboard bishops;
+        bitboard knights;
+        bitboard king;
+
     public:
-        uint64_t pawns;
-        uint64_t rooks;
-        uint64_t bishops;
-        uint64_t knights;
-        uint64_t king;
+        bitboard getPawns() const { return pawns; }
+        void setPawns(bitboard npawns) { pawns = npawns; }
+
+        bitboard getRooks() const { return rooks; }
+        void setRooks(bitboard nrooks) { rooks = nrooks; }
+
+        bitboard getBishops() const { return bishops; }
+        void setBishops(bitboard nbishops) { bishops = nbishops; }
+
+        bitboard getKnights() const { return knights; }
+        void setKnights(bitboard nknights) { knights = nknights; }
+
+        bitboard getKing() const { return king; }
+        void setKing(bitboard nking) { king = nking; }
+
         
 };
 
@@ -129,12 +59,57 @@ class Pieces
 
 //first I need to be able to produce valid 
 
-void printBoard(uint64_t row)
+//function that takes a bitboard with only one piece and returns that square letter-number
+// ul -> "string"
+
+int get_bit_square(bitboard square)
+{
+    for (int i = 0; i < 64; i++)
+    {
+        if (square & (1ull << i))
+        {
+            return i;
+        }
+    }
+    //if there was no bit set return -1. (Should not happen)
+    return -1;
+}
+
+bitboard square_to_bit(int square)
+{
+    if (square >= 0 && square < 64)
+    {
+        return 1ull << square;
+    }
+
+    else { return -1; }
+}
+
+bitboard movePiece(bitboard bboard, int fromSquare, int toSquare)
+{
+    //if there is no piece at the fromSquare then delete it
+    if ((bboard & (1ull << fromSquare)) == 0)
+    {
+        std::cout << "No square at " + squareString[fromSquare] << std::endl;
+        return -1;
+    }
+
+    //else then move the square and with the not of the square to get rid of it
+    // then or with the new square
+    else
+    {
+        bboard &= ~(1ull << fromSquare);
+        bboard |= 1ull << toSquare;
+        return bboard;
+    }
+}
+
+void printBoard(bitboard bboard)
 {
     std::string boardstr = "";
-    for( int i = 0; i < sizeof(row) * 8; i++ )
+    for( int i = 0; i < sizeof(bboard) * 8; i++ )
     {
-        if( row & (1ull << (63 - i)))
+        if( bboard & (1ull << (63 - i)))
         {
             boardstr += "1 ";
         }
@@ -185,7 +160,18 @@ int main()
     std::cout << bstring << std::endl;
 
 
-    std::cout << "test" << std::endl;
+    //initial
+    bitboard btest = 1ull << enumSquare::e4;
+
+    std::cout << "e4" << std::endl;
+    printBoard(btest);
+    btest = movePiece(btest, enumSquare::e4, enumSquare::f6);
+    printBoard(btest);
+    btest = movePiece(btest, enumSquare::e4, enumSquare::a1);
+
+    printBoard(btest);
+
+
 
 
 
