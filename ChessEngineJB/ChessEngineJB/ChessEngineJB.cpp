@@ -8,7 +8,7 @@
 #include "ChessEngineJB.h"
 
 
-struct _move {
+typedef struct _move {
     std::string movestr;
     bitboard bboard;
 }move;
@@ -19,13 +19,62 @@ class Pieces
 {
     private:
         bool color;
+        bitboard bboard;
+
         bitboard pawns;
         bitboard rooks;
         bitboard bishops;
         bitboard knights;
+        bitboard queens;
         bitboard king;
 
+        uint8_t pawnsNum;
+        uint8_t rooksNum;
+        uint8_t bishopsNum;
+        uint8_t knightsNum;
+        uint8_t queensNum;
+        uint8_t kingNum;
+
     public:
+
+        /* Constructors */
+        Pieces(bool sColor)
+        {
+            color = sColor;
+
+            if( color == pieceColor::WHITE )
+            {
+                pawns = pieceBitboards[WHITEPAWNS];
+                rooks = pieceBitboards[WHITEROOKS];
+                bishops = pieceBitboards[WHITEBISHOPS];
+                knights = pieceBitboards[WHITEKNIGHTS];
+                queens = pieceBitboards[WHITEQUEENS];
+                king = pieceBitboards[WHITEKING];
+
+            }
+
+            else if ( color == pieceColor::BLACK )
+            {
+                pawns = pieceBitboards[WHITEPAWNS];
+                rooks = pieceBitboards[WHITEROOKS];
+                bishops = pieceBitboards[WHITEBISHOPS];
+                knights = pieceBitboards[WHITEKNIGHTS];
+                queens = pieceBitboards[WHITEQUEENS];
+                king = pieceBitboards[WHITEKING];
+            }
+
+            
+            pawnsNum = 8;
+            rooksNum = 2;
+            bishopsNum = 2;
+            knightsNum = 2;
+            queensNum = 1;
+            kingNum = 1;
+        }
+
+
+
+        /* Setters and Getters*/
         bitboard getPawns() const { return pawns; }
         void setPawns(bitboard npawns) { pawns = npawns; }
 
@@ -40,11 +89,36 @@ class Pieces
 
         bitboard getKing() const { return king; }
         void setKing(bitboard nking) { king = nking; }
+        
+        bitboard getQueens() const { return queens; }
+        void setColor(bool nqueens) { queens = nqueens; }
+        
+        bitboard getBBoard() const { return bboard; }
+        void setColor(bool nbboard) { bboard = nbboard; }
 
         bitboard getColor() const { return color; }
         void setColor(bool ncolor) { color = ncolor; }
-
         
+
+
+        /* functionality */
+        //returns a list of square indexes that pawns are at
+        int * getPawnPositions() const
+        {
+            int pawnsPos[pawnsNum];
+            int t = 0;
+            for ( int i = 0; i < sizeof(pawns) * 8; i++ )
+            {
+                if( pawns & (1ull <<  i))
+                {
+                    pawnsPos[t] = i;
+                    t += 1;
+                }
+            }
+            return pawnsPos;
+        }
+
+
 
         
 };
@@ -193,4 +267,7 @@ int main()
 //Things to do for next time
 //Start on the board and pieces classes. Maybe just make it a board class?
 // need to be actively thinking about valid move generation.
+
+
+//1.5 hours more
 
