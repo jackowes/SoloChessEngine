@@ -1,5 +1,7 @@
 typedef uint64_t bitboard;
 
+//extern const uint64_t emptySet = 0xFFFFFFFFFFFFFFFF;
+#define EMPTYSET 0xFFFFFFFFFFFFFFFF
 
 enum pieceColor {
     BLACK,

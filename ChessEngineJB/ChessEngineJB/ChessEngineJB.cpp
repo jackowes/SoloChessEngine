@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <bitset>
+#include <vector>
+#include <cstring>
 
 
 #include "ChessEngineJB.h"
@@ -13,135 +15,258 @@ typedef struct _move {
     bitboard bboard;
 }move;
 
-
-
-class Pieces
+class Piece
 {
     private:
-        bool color;
-        bitboard bboard;
-
-        bitboard pawns;
-        bitboard rooks;
-        bitboard bishops;
-        bitboard knights;
-        bitboard queens;
-        bitboard king;
-
-        uint8_t pawnsNum;
-        uint8_t rooksNum;
-        uint8_t bishopsNum;
-        uint8_t knightsNum;
-        uint8_t queensNum;
-        uint8_t kingNum;
-
     public:
+        bitboard pieceBitboard;
+
+    
 
         /* Constructors */
-        Pieces(bool sColor)
+        Piece()
         {
-            color = sColor;
+            pieceBitboard = EMPTYSET;
+        }
+
+        Piece(bitboard bboard)
+        {
+            pieceBitboard = bboard;
+        }
+
+        /* Getters and Setters */
+        bitboard getBitboard() const { return pieceBitboard; }
+        void setBitboard(bitboard bboard) { pieceBitboard = bboard; }
+
+
+        /* functionality */
+        /* returns the count of the piece type on the board*/
+        int getCount() const
+        {
+            int c = 0;
+            for (int i = 0; i < sizeof(bitboard) * 8; i++)
+            {
+                if ( pieceBitboard & (1ull << i) )
+                {
+                    c += 1;
+                }
+            }
+            return c;
+        }
+
+    
+        //returns a list of square indexes that pawns are at
+        std::vector<int> getPositions() const
+        {
+            std::vector<int> piecePos;
+            int c = getCount();
+            int t = 0;
+            for (int i = 0; i < sizeof(bitboard) * 8; i++)
+            {
+                if (pieceBitboard & (1ull << i))
+                {
+                    piecePos.push_back(i);
+                }
+            }
+            return piecePos;
+        }
+};
+
+
+
+class Player
+{
+    private:
+    public:
+        bool color;
+
+        Piece pawns;
+        Piece rooks;
+        Piece bishops;
+        Piece knights;
+        Piece queens;
+        Piece king;
+
+        Piece* pieceArray[6];
+
+    
+
+        /* Constructors */
+        Player()
+        {
+            color = WHITE;
+
+            if (color == pieceColor::WHITE)
+            {
+                pawns = Piece(pieceBitboards[WHITEPAWNS]);
+                rooks = Piece(pieceBitboards[WHITEROOKS]);
+                bishops = Piece(pieceBitboards[WHITEBISHOPS]);
+                knights = Piece(pieceBitboards[WHITEKNIGHTS]);
+                queens = Piece(pieceBitboards[WHITEQUEENS]);
+                king = Piece(pieceBitboards[WHITEKING]);
+
+            }
+            pieceArray[0] = &pawns;
+            pieceArray[1] = &rooks;
+            pieceArray[2] = &bishops;
+            pieceArray[3] = &knights;
+            pieceArray[4] = &queens;
+            pieceArray[5] = &king;
+            
+        }
+
+
+        Player(bool pColor)
+        {
+            color = pColor;
 
             if( color == pieceColor::WHITE )
             {
-                pawns = pieceBitboards[WHITEPAWNS];
-                rooks = pieceBitboards[WHITEROOKS];
-                bishops = pieceBitboards[WHITEBISHOPS];
-                knights = pieceBitboards[WHITEKNIGHTS];
-                queens = pieceBitboards[WHITEQUEENS];
-                king = pieceBitboards[WHITEKING];
+                pawns = Piece(pieceBitboards[WHITEPAWNS]);
+                rooks = Piece(pieceBitboards[WHITEROOKS]);
+                bishops = Piece(pieceBitboards[WHITEBISHOPS]);
+                knights = Piece(pieceBitboards[WHITEKNIGHTS]);
+                queens = Piece(pieceBitboards[WHITEQUEENS]);
+                king = Piece(pieceBitboards[WHITEKING]);
 
             }
 
             else if ( color == pieceColor::BLACK )
             {
-                pawns = pieceBitboards[WHITEPAWNS];
-                rooks = pieceBitboards[WHITEROOKS];
-                bishops = pieceBitboards[WHITEBISHOPS];
-                knights = pieceBitboards[WHITEKNIGHTS];
-                queens = pieceBitboards[WHITEQUEENS];
-                king = pieceBitboards[WHITEKING];
+                pawns = Piece(pieceBitboards[BLACKPAWNS]);
+                rooks = Piece(pieceBitboards[BLACKROOKS]);
+                bishops = Piece(pieceBitboards[BLACKBISHOPS]);
+                knights = Piece(pieceBitboards[BLACKKNIGHTS]);
+                queens = Piece(pieceBitboards[BLACKQUEENS]);
+                king = Piece(pieceBitboards[BLACKKING]);
             }
+            pieceArray[0] = &pawns;
+            pieceArray[1] = &rooks;
+            pieceArray[2] = &bishops;
+            pieceArray[3] = &knights;
+            pieceArray[4] = &queens;
+            pieceArray[5] = &king;
 
-            
-            pawnsNum = 8;
-            rooksNum = 2;
-            bishopsNum = 2;
-            knightsNum = 2;
-            queensNum = 1;
-            kingNum = 1;
         }
 
 
 
         /* Setters and Getters*/
-        bitboard getPawns() const { return pawns; }
-        void setPawns(bitboard npawns) { pawns = npawns; }
-
-        bitboard getRooks() const { return rooks; }
-        void setRooks(bitboard nrooks) { rooks = nrooks; }
-
-        bitboard getBishops() const { return bishops; }
-        void setBishops(bitboard nbishops) { bishops = nbishops; }
-
-        bitboard getKnights() const { return knights; }
-        void setKnights(bitboard nknights) { knights = nknights; }
-
-        bitboard getKing() const { return king; }
-        void setKing(bitboard nking) { king = nking; }
-        
-        bitboard getQueens() const { return queens; }
-        void setColor(bool nqueens) { queens = nqueens; }
-        
-        bitboard getBBoard() const { return bboard; }
-        void setColor(bool nbboard) { bboard = nbboard; }
-
-        bitboard getColor() const { return color; }
+        bool getColor() const { return color; }
         void setColor(bool ncolor) { color = ncolor; }
-        
 
-
-        /* functionality */
-        //returns a list of square indexes that pawns are at
-        int * getPawnPositions() const
-        {
-            int pawnsPos[pawnsNum];
-            int t = 0;
-            for ( int i = 0; i < sizeof(pawns) * 8; i++ )
-            {
-                if( pawns & (1ull <<  i))
-                {
-                    pawnsPos[t] = i;
-                    t += 1;
-                }
-            }
-            return pawnsPos;
+        bitboard getPlayerBoard() const 
+        { 
+            return pawns.getBitboard() | rooks.getBitboard() | bishops.getBitboard() | knights.getBitboard() | queens.getBitboard() | king.getBitboard(); 
         }
-
-
-
-        
+        //not sure if I should be adding this setter yet?
 };
 
 
-// //likely should do operations 
-// class ChessBoard
-// {
-//     public:
+
+class Chessboard
+{
+
+    private:
+    public:
+        bool turn;
+        Player white;
+        Player black;
 
     
-//         ChessBoard()
-//         {
+
+
+        Chessboard()
+        {
+            turn = pieceColor::WHITE;
+            white = Player(pieceColor::WHITE);
+            black = Player(pieceColor::BLACK);
+
+ 
+        }
+
+        bitboard getBoard() const 
+        { 
+            return white.getPlayerBoard() | black.getPlayerBoard();
+        }
+
+        Player getPlayer(bool color)
+        {
+            if (color = pieceColor::WHITE)
+            {
+                return white;
+            }
+            else if (color = pieceColor::BLACK)
+            {
+                return black;
+            }
+        }
+
+        void printBoardStyle()
+        {
+            char boardstr[64];
+            memset(boardstr, '0', 64);
             
-//         }
-// }
+            Player players[2];
+            players[0] = black;
+            players[1] = white;
+
+            int playerCharVal[2] = {32, 0};
+            std::vector<int> v;
+
+            for (int j = pieceColor::BLACK; j <= pieceColor::WHITE; j++)
+            {
+                v = players[j].pawns.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'p' - playerCharVal[j];
+                }
+                v = players[j].rooks.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'r' - playerCharVal[j];
+                }
+                v = players[j].bishops.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'b' - playerCharVal[j];
+                }
+                v = players[j].knights.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'n' - playerCharVal[j];
+                }
+                v = players[j].queens.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'q' - playerCharVal[j];
+                }
+                v = players[j].king.getPositions();
+                for (int i = 0; i < v.size(); i++)
+                {
+                    boardstr[v[i]] = 'k' - playerCharVal[j];
+                }
+            }
+
+            for (int i = sizeof(bitboard) * 8 - 1; i >= 0; i--)
+            {
+                std::cout << boardstr[i];
+                std::cout << " ";
+                
+                if ((i) % 8 == 0)
+                {
+                    std::cout << "\n";
+                }
+            }
+        }
+};
 
 //first I need to be able to produce valid 
 
 //function that takes a bitboard with only one piece and returns that square letter-number
 // ul -> "string"
 
-int get_bit_square(bitboard square)
+int bit_to_index(bitboard square)
 {
     for (int i = 0; i < 64; i++)
     {
@@ -154,7 +279,7 @@ int get_bit_square(bitboard square)
     return -1;
 }
 
-bitboard square_to_bit(int square)
+bitboard index_to_bit(int square)
 {
     if (square >= 0 && square < 64)
     {
@@ -201,34 +326,19 @@ void printBoard(bitboard bboard)
     }
 
     std::cout << boardstr << std::endl;
+
+
+
 }
-int main()
+
+
+void printValueBoard()
 {
-
-    for ( int i = WHITEPAWNS; i <= BLACKKING; i++ )
-    {
-        std::cout << pieceBitboardNames[i] << std::endl;
-        printBoard(pieceBitboards[i]);
-    }
-    
-    printBoard(pieceBitboards[BLACKKING]);
-    printBoard(pieceBitboards[BLACKKING] >> 8);
-    printBoard(pieceBitboards[BLACKKING] >> 8 * 2);
-
-    char t = '1';
-    
-
-    //compass
-    //we are white and the opposition is playing black
-    //North (+ 8) or ( << 8)
-    //South (- 8) or ( >> 8)
-    //West ( + 9)
-
     std::string bstring = "";
 
-    for ( char t = '8' ; t > '0'; t-- )
+    for (char t = '8'; t > '0'; t--)
     {
-        for ( char c = 'a' ; c < 'i'; c++)
+        for (char c = 'a'; c < 'i'; c++)
         {
             bstring += c;
             bstring += t;
@@ -237,25 +347,41 @@ int main()
         bstring += "\n";
     }
     std::cout << bstring << std::endl;
+}
 
 
-    //initial
-    bitboard btest = 1ull << enumSquare::e4;
+int main()
+{
 
-    std::cout << "e4" << std::endl;
-    printBoard(btest);
-    btest = movePiece(btest, enumSquare::e4, enumSquare::f6);
-    printBoard(btest);
+    //compass
+    //we are white and the opposition is playing black
+    //North (+ 8) or ( << 8)
+    //South (- 8) or ( >> 8)
+    //West ( + 9)
+
+    printValueBoard();
+
+    Chessboard cboard = Chessboard();
+
+    printBoard(cboard.getBoard());
+
+    printBoard(cboard.white.pawns.getBitboard());
+
+    std::vector<int> vec = cboard.white.pawns.getPositions();
 
 
-    
+    cboard.printBoardStyle();
+
+
+    char c = 'p';
+    char t = 'P';
+    int diff = c - t;
+
+    std::cout << diff;
 
 
 
 
-
-
-    
 
 }
 
@@ -270,4 +396,6 @@ int main()
 
 
 //1.5 hours more
+
+//another 1 hour trying to figure out how I might gracefully get all these positions
 
